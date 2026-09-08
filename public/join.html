@@ -671,30 +671,40 @@
 
     // Initialize Camera & Mic preview in Lobby
     async function initPreview() {
+      // Mic — ayrıca try/catch
+      try {
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        isMicOn = true;
+        btnToggleMic.className = 'btn-circle active';
+      } catch (e) {
+        console.warn('Mikrofon tapılmadı və ya icazə verilmədi:', e);
+        isMicOn = false;
+        btnToggleMic.className = 'btn-circle off';
+      }
+
+      // Camera — ayrıca try/catch
       try {
         availableCameras = await AgoraRTC.getCameras();
-        if (availableCameras.length > 1) {
-          btnSwitchCam.style.display = 'flex';
-          document.getElementById('dock-flip').style.display = 'flex';
+        if (availableCameras.length > 0) {
+          localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+          isCamOn = true;
+          btnToggleCam.className = 'btn-circle active';
+          previewContainer.style.display = 'block';
+          previewAvatar.style.display = 'none';
+          localVideoTrack.play('preview-video-container');
+          if (availableCameras.length > 1) {
+            btnSwitchCam.style.display = 'flex';
+            document.getElementById('dock-flip').style.display = 'flex';
+          }
+        } else {
+          throw new Error('No camera found');
         }
-
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-
-        previewContainer.style.display = 'block';
-        previewAvatar.style.display = 'none';
-        localVideoTrack.play('preview-video-container');
-
-        btnToggleMic.className = 'btn-circle active';
-        btnToggleCam.className = 'btn-circle active';
-        isMicOn = true;
-        isCamOn = true;
       } catch (e) {
-        console.warn('Media preview permission not granted or device missing:', e);
-        isMicOn = false;
+        console.warn('Kamera tapılmadı və ya icazə verilmədi:', e);
         isCamOn = false;
-        btnToggleMic.className = 'btn-circle off';
         btnToggleCam.className = 'btn-circle off';
+        previewContainer.style.display = 'none';
+        previewAvatar.style.display = 'flex';
       }
     }
 
@@ -826,20 +836,40 @@
         // Join Agora Channel
         await agoraClient.join(appId, channelName, token, uid);
 
-        // Ensure tracks exist
-        if (!localAudioTrack) localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        if (!localVideoTrack) localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        // Ensure mic track exists
+        if (!localAudioTrack) {
+          try {
+            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+          } catch (e) {
+            console.warn('Mikrofon yaradıla bilmədi:', e);
+          }
+        }
 
-        // Publish local tracks
-        await agoraClient.publish([localAudioTrack, localVideoTrack]);
+        // Try creating camera track (may fail on devices without camera)
+        if (!localVideoTrack && isCamOn) {
+          try {
+            localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+          } catch (e) {
+            console.warn('Kamera yaradıla bilmədi:', e);
+            isCamOn = false;
+          }
+        }
 
-        // Play local video in call grid
-        localVideoTrack.play('local-video-player');
-        if (!isCamOn) {
+        // Publish only available tracks
+        const tracksToPublish = [];
+        if (localAudioTrack) tracksToPublish.push(localAudioTrack);
+        if (localVideoTrack) tracksToPublish.push(localVideoTrack);
+        if (tracksToPublish.length > 0) {
+          await agoraClient.publish(tracksToPublish);
+        }
+
+        // Play local video in call grid (or show avatar if no camera)
+        if (localVideoTrack && isCamOn) {
+          localVideoTrack.play('local-video-player');
+          document.getElementById('local-avatar').style.display = 'none';
+        } else {
           document.getElementById('local-video-player').style.display = 'none';
           document.getElementById('local-avatar').style.display = 'flex';
-        } else {
-          document.getElementById('local-avatar').style.display = 'none';
         }
 
         // Setup Dock Button Events
