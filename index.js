@@ -127,10 +127,18 @@ app.post('/api/rooms/end', (req, res) => {
   const room = activeRooms.get(roomId);
   if (room) {
     room.status = 'ended';
-    console.log(`🛑 Otaq sonlandırıldı (Destroy): ${roomId}`);
+    room.endedAt = Date.now();
+    console.log(`🛑 Otaq sonlandırıldı və link məhv edildi (Destroy): ${roomId}`);
+  } else {
+    activeRooms.set(roomId, {
+      roomId,
+      status: 'ended',
+      endedAt: Date.now(),
+    });
+    console.log(`🛑 Otaq qeyd edildi və sonlandırıldı: ${roomId}`);
   }
 
-  res.json({ success: true });
+  res.json({ success: true, message: 'Otaq və qonaq linki uğurla məhv edildi' });
 });
 
 // Check room status
@@ -138,23 +146,17 @@ app.get('/api/rooms/:roomId/status', (req, res) => {
   const { roomId } = req.params;
   const room = activeRooms.get(roomId);
 
-  if (!room) {
-    // If not registered explicitly, allow by default as fallback active room
-    return res.json({
-      exists: true,
-      active: true,
-      title: 'İdrak Liseyi Canlı Görüş',
-      hostName: 'Müəllim',
-      allowGuestLink: true,
-      guestLimit: 10,
-      guestCount: 0,
-      hasVideo: true,
+  if (!room || room.status !== 'active') {
+    return res.status(403).json({
+      exists: Boolean(room),
+      active: false,
+      error: 'Bu görüşmə başa çatıb və ya link etibarsızdır.',
     });
   }
 
   res.json({
     exists: true,
-    active: room.status === 'active',
+    active: true,
     title: room.title,
     hostName: room.hostName,
     allowGuestLink: room.allowGuestLink,
@@ -174,25 +176,13 @@ app.post('/api/rooms/:roomId/join-guest', (req, res) => {
       return res.status(400).json({ error: 'Qonaq adı daxil edilməlidir' });
     }
 
-    let room = activeRooms.get(roomId);
-    if (!room) {
-      // Auto-register default active room if not pre-registered
-      room = {
-        roomId,
-        title: 'İdrak Liseyi Canlı Görüş',
-        hostName: 'Müəllim',
-        allowGuestLink: true,
-        guestLimit: 10,
-        guestCount: 0,
-        status: 'active',
-        hasVideo: true,
-        createdAt: Date.now(),
-      };
-      activeRooms.set(roomId, room);
+    const room = activeRooms.get(roomId);
+    if (!room || room.status !== 'active') {
+      return res.status(403).json({ error: 'Bu görüşmə artıq başa çatıb və link etibarsızdır.' });
     }
 
-    if (room.status !== 'active') {
-      return res.status(403).json({ error: 'Bu görüşmə başa çatıb və ya link etibarsızdır.' });
+    if (!room.allowGuestLink) {
+      return res.status(403).json({ error: 'Bu görüşmə üçün qonaq girişi qapalıdır.' });
     }
 
     if (room.guestLimit > 0 && room.guestCount >= room.guestLimit) {

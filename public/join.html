@@ -886,6 +886,9 @@
         // Setup Dock Button Events
         setupDockControls();
 
+        // Start Room Status Watcher (Heartbeat) - auto-disconnects if Host ends meeting
+        startRoomStatusWatcher();
+
       } catch (err) {
         console.error('Join error:', err);
         alert('Görüşməyə qoşularkən xəta baş verdi: ' + err.message);
@@ -893,6 +896,56 @@
         btnJoin.innerText = '🚀 Görüşməyə Qoşul';
       }
     };
+
+    let roomStatusWatcher = null;
+
+    function startRoomStatusWatcher() {
+      if (roomStatusWatcher) clearInterval(roomStatusWatcher);
+      roomStatusWatcher = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/status`);
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            clearInterval(roomStatusWatcher);
+            roomStatusWatcher = null;
+            await forceEndCall('🛑 Görüşmə Başa Çatdı', data.error || 'Host görüşməni sonlandırdı. Link artıq etibarsızdır.');
+            return;
+          }
+          const data = await res.json();
+          if (!data.active) {
+            clearInterval(roomStatusWatcher);
+            roomStatusWatcher = null;
+            await forceEndCall('🛑 Görüşmə Başa Çatdı', 'Host görüşməni sonlandırdı. Link artıq etibarsızdır.');
+          }
+        } catch (e) {
+          // Network fluctuation, ignore single check failure
+        }
+      }, 2500);
+    }
+
+    async function forceEndCall(heading, msg) {
+      if (roomStatusWatcher) {
+        clearInterval(roomStatusWatcher);
+        roomStatusWatcher = null;
+      }
+      try {
+        if (localAudioTrack) {
+          localAudioTrack.stop();
+          localAudioTrack.close();
+          localAudioTrack = null;
+        }
+        if (localVideoTrack) {
+          localVideoTrack.stop();
+          localVideoTrack.close();
+          localVideoTrack = null;
+        }
+        if (agoraClient) {
+          await agoraClient.leave();
+          agoraClient = null;
+        }
+      } catch (e) {}
+      showStatusScreen(heading, msg);
+    }
 
     function renderRemoteUser(user) {
       let tile = document.getElementById(`user-tile-${user.uid}`);
@@ -968,17 +1021,24 @@
     }
 
     async function leaveCall() {
+      if (roomStatusWatcher) {
+        clearInterval(roomStatusWatcher);
+        roomStatusWatcher = null;
+      }
       try {
         if (localAudioTrack) {
           localAudioTrack.stop();
           localAudioTrack.close();
+          localAudioTrack = null;
         }
         if (localVideoTrack) {
           localVideoTrack.stop();
           localVideoTrack.close();
+          localVideoTrack = null;
         }
         if (agoraClient) {
           await agoraClient.leave();
+          agoraClient = null;
         }
         await fetch(`/api/rooms/${encodeURIComponent(roomId)}/leave-guest`, { method: 'POST' }).catch(() => {});
       } catch (e) {}
