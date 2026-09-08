@@ -6,7 +6,7 @@
   <title>İdrak Liseyi - Canlı Görüşmə</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js"></script>
   <style>
     * {
@@ -18,7 +18,7 @@
     }
 
     body {
-      background-color: #070B16;
+      background-color: #111214; /* Discord Pure Dark */
       color: #FFFFFF;
       min-height: 100vh;
       display: flex;
@@ -26,11 +26,11 @@
       overflow-x: hidden;
     }
 
-    /* ─── Top Navbar ─── */
+    /* ─── Discord Top Navbar ─── */
     .navbar {
-      background-color: #0F172A;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 12px 20px;
+      background-color: #1E1F22;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -43,31 +43,34 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #0D9488, #14B8A6);
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #5865F2, #4752C4); /* Discord Blurple */
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 18px;
+      font-weight: 900;
+      font-size: 16px;
       color: #FFF;
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+      flex-shrink: 0;
     }
 
     .brand-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
-      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .brand-sub {
-      font-size: 11px;
-      color: #94A3B8;
+      font-size: 10.5px;
+      color: #949BA4;
       font-weight: 500;
     }
 
@@ -79,15 +82,16 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
-      background: rgba(16, 185, 129, 0.15);
-      color: #10B981;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(35, 165, 90, 0.15);
+      color: #23A55A; /* Discord Green */
+      border: 1px solid rgba(35, 165, 90, 0.3);
+      flex-shrink: 0;
     }
 
     .status-dot {
       width: 6px;
       height: 6px;
-      background: #10B981;
+      background: #23A55A;
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
@@ -104,6 +108,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      overflow: hidden;
     }
 
     /* ─── Lobby View ─── */
@@ -112,143 +117,137 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 16px;
     }
 
     .lobby-card {
-      background: #0F172A;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 28px;
-      max-width: 440px;
+      background: #1E1F22;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 420px;
       width: 100%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
     }
 
     .lobby-header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .lobby-header h2 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .lobby-header p {
-      color: #94A3B8;
-      font-size: 13px;
+      color: #949BA4;
+      font-size: 12.5px;
     }
 
     .preview-box {
       width: 100%;
-      height: 220px;
-      background: #070B16;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      height: 200px;
+      background: #111214;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
       position: relative;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    #preview-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1);
     }
 
     .preview-avatar {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      color: #64748B;
+      gap: 8px;
+      color: #949BA4;
     }
 
     .preview-avatar .avatar-circle {
-      width: 68px;
-      height: 68px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: #1E293B;
+      background: #2B2D31;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 24px;
     }
 
     .preview-controls {
       position: absolute;
-      bottom: 12px;
+      bottom: 10px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       z-index: 10;
     }
 
     .btn-circle {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(30, 31, 34, 0.85);
       backdrop-filter: blur(8px);
       color: #FFF;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      font-size: 15px;
       transition: all 0.2s;
     }
 
     .btn-circle.active {
-      background: #0D9488;
-      border-color: #0D9488;
+      background: #23A55A;
+      border-color: #23A55A;
     }
 
     .btn-circle.off {
-      background: #EF4444;
-      border-color: #EF4444;
+      background: #DA373C;
+      border-color: #DA373C;
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .form-label {
       display: block;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
-      margin-bottom: 8px;
-      color: #E2E8F0;
+      margin-bottom: 6px;
+      color: #DBDEE1;
     }
 
     .form-input {
       width: 100%;
-      padding: 12px 16px;
-      background: #1E293B;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
+      padding: 12px 14px;
+      background: #2B2D31;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
       color: #FFF;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       outline: none;
       transition: border-color 0.2s;
     }
 
     .form-input:focus {
-      border-color: #0D9488;
+      border-color: #5865F2;
     }
 
     .btn-primary {
       width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #0D9488, #14B8A6);
+      padding: 13px;
+      background: #5865F2;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       color: #FFF;
       font-size: 14px;
       font-weight: 800;
@@ -256,9 +255,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
-      transition: opacity 0.2s, transform 0.1s;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+      transition: all 0.2s;
     }
 
     .btn-primary:active {
@@ -270,7 +269,7 @@
       cursor: not-allowed;
     }
 
-    /* ─── Call View ─── */
+    /* ─── Discord Call View ─── */
     #call-view {
       flex: 1;
       display: none;
@@ -279,43 +278,132 @@
       overflow: hidden;
     }
 
+    /* ─── Stage / Grid Container ─── */
+    .call-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: calc(100vh - 125px);
+    }
+
+    /* Normal Grid */
     .call-grid {
       flex: 1;
-      padding: 14px;
       display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       align-content: center;
       justify-content: center;
-      overflow-y: auto;
-      max-height: calc(100vh - 140px);
     }
 
     @media (max-width: 600px) {
       .call-grid {
         grid-template-columns: 1fr;
-        padding: 8px;
-        gap: 8px;
       }
     }
 
+    /* ─── Spotlight Mode ─── */
+    #call-view.spotlight-active .call-grid {
+      display: none;
+    }
+
+    .spotlight-stage {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #call-view.spotlight-active .spotlight-stage {
+      display: flex;
+    }
+
+    .spotlight-main {
+      flex: 1;
+      min-height: 260px;
+      position: relative;
+    }
+
+    .spotlight-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      height: 95px;
+      flex-shrink: 0;
+    }
+
+    .spotlight-strip .video-card {
+      width: 120px;
+      min-height: 85px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .spotlight-strip .card-badge-name {
+      font-size: 9.5px;
+      padding: 2px 6px;
+    }
+
+    .spotlight-strip .card-avatar .avatar-img {
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+    }
+
+    /* Floating Spotlight Header Pill */
+    .spotlight-pill {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(17, 18, 20, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.2s;
+    }
+
+    .spotlight-pill:hover {
+      background: rgba(88, 101, 242, 0.9);
+      border-color: #5865F2;
+    }
+
+    /* ─── Video Card (Discord Style) ─── */
     .video-card {
-      background: #0F172A;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
+      background: #1E1F22;
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
       position: relative;
       overflow: hidden;
       aspect-ratio: 16 / 9;
-      min-height: 180px;
+      min-height: 160px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .video-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .video-card.speaking {
-      border: 2px solid #10B981;
-      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+      border: 2px solid #23A55A !important;
+      box-shadow: 0 0 16px rgba(35, 165, 90, 0.45);
     }
 
     .video-player {
@@ -334,85 +422,85 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       z-index: 1;
     }
 
     .card-avatar .avatar-img {
-      width: 64px;
-      height: 64px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
-      background: #1E293B;
+      background: #2B2D31;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 800;
-      color: #14B8A6;
+      color: #5865F2;
       border: 2px solid rgba(255, 255, 255, 0.1);
     }
 
     .card-badge-name {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      padding: 4px 10px;
-      border-radius: 10px;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(17, 18, 20, 0.75);
+      backdrop-filter: blur(6px);
+      padding: 3px 8px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 700;
       color: #FFF;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       z-index: 10;
     }
 
     .card-badge-role {
-      background: rgba(20, 184, 166, 0.2);
-      color: #14B8A6;
+      background: rgba(88, 101, 242, 0.25);
+      color: #5865F2;
       font-size: 9px;
-      padding: 1px 6px;
-      border-radius: 6px;
+      padding: 1px 5px;
+      border-radius: 5px;
       font-weight: 800;
     }
 
     .card-badge-mic {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 28px;
-      height: 28px;
+      top: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(17, 18, 20, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 12px;
       z-index: 10;
     }
 
     .card-badge-mic.muted {
-      background: #EF4444;
+      background: #DA373C;
       color: #FFF;
     }
 
     .card-badge-mic.unmuted {
-      background: rgba(16, 185, 129, 0.2);
-      color: #10B981;
-      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: rgba(35, 165, 90, 0.2);
+      color: #23A55A;
+      border: 1px solid rgba(35, 165, 90, 0.4);
     }
 
-    /* ─── In-Call Control Dock ─── */
+    /* ─── Discord Floating Control Dock ─── */
     .control-dock {
-      background: #0F172A;
+      background: #18191C;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px 20px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
       position: sticky;
       bottom: 0;
       z-index: 100;
@@ -422,7 +510,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       background: none;
       border: none;
       color: #FFF;
@@ -430,40 +518,40 @@
     }
 
     .dock-btn .btn-icon {
-      width: 50px;
-      height: 50px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #2B2D31;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       transition: all 0.2s;
     }
 
     .dock-btn .btn-icon.active {
-      background: #10B981;
-      border-color: #10B981;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      background: #23A55A;
+      border-color: #23A55A;
+      box-shadow: 0 4px 10px rgba(35, 165, 90, 0.4);
     }
 
     .dock-btn .btn-icon.off {
-      background: #EF4444;
-      border-color: #EF4444;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      background: #DA373C;
+      border-color: #DA373C;
+      box-shadow: 0 4px 10px rgba(218, 55, 60, 0.4);
     }
 
     .dock-btn .btn-icon.leave {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.5);
-      color: #EF4444;
+      background: rgba(218, 55, 60, 0.25);
+      border-color: rgba(218, 55, 60, 0.6);
+      color: #DA373C;
     }
 
     .dock-btn .btn-label {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
-      color: #94A3B8;
+      color: #949BA4;
     }
 
     /* ─── Error / Ended Screen ─── */
@@ -477,43 +565,43 @@
     }
 
     .status-box {
-      background: #0F172A;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 36px 24px;
-      max-width: 400px;
+      background: #1E1F22;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 32px 20px;
+      max-width: 380px;
       width: 100%;
     }
 
     .status-icon {
-      width: 64px;
-      height: 64px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: rgba(239, 68, 68, 0.15);
-      color: #EF4444;
+      background: rgba(218, 55, 60, 0.15);
+      color: #DA373C;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 16px;
+      font-size: 24px;
+      margin: 0 auto 14px;
     }
 
     .status-box h3 {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .status-box p {
-      color: #94A3B8;
-      font-size: 13px;
+      color: #949BA4;
+      font-size: 12.5px;
       line-height: 1.5;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navbar -->
+  <!-- Discord Navbar -->
   <header class="navbar">
     <div class="nav-brand">
       <div class="brand-logo">İ</div>
@@ -542,7 +630,7 @@
           <div id="preview-video-container" style="width:100%;height:100%;display:none;"></div>
           <div class="preview-avatar" id="preview-avatar">
             <div class="avatar-circle">👤</div>
-            <span style="font-size:12px;font-weight:600;">Kamera Bağlıdır</span>
+            <span style="font-size:11.5px;font-weight:600;">Kamera Bağlıdır</span>
           </div>
 
           <div class="preview-controls">
@@ -565,22 +653,38 @@
 
     <!-- 2. Call Screen (In-Meeting) -->
     <section id="call-view">
-      <div class="call-grid" id="video-grid">
-        <!-- Local User Video Tile -->
-        <div class="video-card" id="local-tile">
-          <div class="video-player mirror" id="local-video-player"></div>
-          <div class="card-avatar" id="local-avatar">
-            <div class="avatar-img" id="local-initials">S</div>
-            <div style="font-size:12px;font-weight:700;" id="local-name-display">Siz</div>
+      <div class="call-content">
+
+        <!-- Grid View (All tiles) -->
+        <div class="call-grid" id="video-grid">
+          <!-- Local Tile -->
+          <div class="video-card" id="local-tile" onclick="toggleSpotlight('local-tile')">
+            <div class="video-player mirror" id="local-video-player"></div>
+            <div class="card-avatar" id="local-avatar">
+              <div class="avatar-img" id="local-initials">S</div>
+              <div style="font-size:12px;font-weight:700;" id="local-name-display">Siz</div>
+            </div>
+            <div class="card-badge-name">
+              <span id="local-badge-name">Siz (Qonaq)</span>
+              <span class="card-badge-role">Mən</span>
+            </div>
+            <div class="card-badge-mic unmuted" id="local-mic-badge">🎤</div>
           </div>
-          <div class="card-badge-name">
-            <span id="local-badge-name">Siz (Qonaq)</span>
-            <span class="card-badge-role">Mən</span>
-          </div>
-          <div class="card-badge-mic unmuted" id="local-mic-badge">🎤</div>
         </div>
 
-        <!-- Remote Participants will be dynamically appended here -->
+        <!-- Spotlight Stage View (When a tile is clicked) -->
+        <div class="spotlight-stage" id="spotlight-stage">
+          <div class="spotlight-main" id="spotlight-main">
+            <div class="spotlight-pill" onclick="exitSpotlight()">
+              <span>🔲 Grid-ə Qayıt</span>
+            </div>
+            <!-- Focused card moves here -->
+          </div>
+          <div class="spotlight-strip" id="spotlight-strip">
+            <!-- Other participant cards move here -->
+          </div>
+        </div>
+
       </div>
 
       <!-- Dock Controls -->
@@ -602,7 +706,7 @@
 
         <button class="dock-btn" id="dock-leave">
           <div class="btn-icon leave">📞</div>
-          <span class="btn-label" style="color:#EF4444;">Ayrıl</span>
+          <span class="btn-label" style="color:#DA373C;">Ayrıl</span>
         </button>
       </footer>
     </section>
@@ -610,7 +714,7 @@
     <!-- 3. Status / Ended View -->
     <section id="status-view">
       <div class="status-box">
-        <div class="status-icon" id="status-icon">🔒</div>
+        <div class="status-icon" id="status-icon">🛑</div>
         <h3 id="status-heading">Görüşmə Başa Çatdı</h3>
         <p id="status-msg">Bu otaq müəllim tərəfindən sonlandırılıb və ya qonaq linki deaktiv edilib.</p>
       </div>
@@ -631,7 +735,7 @@
     let isCamOn = true;
     let currentCameraIndex = 0;
     let availableCameras = [];
-    const remoteUsers = new Map();
+    let spotlightTileId = null;
 
     // DOM Elements
     const lobbyView = document.getElementById('lobby-view');
@@ -644,6 +748,9 @@
     const btnSwitchCam = document.getElementById('btn-switch-cam');
     const previewContainer = document.getElementById('preview-video-container');
     const previewAvatar = document.getElementById('preview-avatar');
+    const videoGrid = document.getElementById('video-grid');
+    const spotlightMain = document.getElementById('spotlight-main');
+    const spotlightStrip = document.getElementById('spotlight-strip');
 
     // Check Room Status on load
     async function checkRoom() {
@@ -671,18 +778,16 @@
 
     // Initialize Camera & Mic preview in Lobby
     async function initPreview() {
-      // Mic — ayrıca try/catch
       try {
         localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         isMicOn = true;
         btnToggleMic.className = 'btn-circle active';
       } catch (e) {
-        console.warn('Mikrofon tapılmadı və ya icazə verilmədi:', e);
+        console.warn('Mikrofon tapılmadı:', e);
         isMicOn = false;
         btnToggleMic.className = 'btn-circle off';
       }
 
-      // Camera — ayrıca try/catch
       try {
         availableCameras = await AgoraRTC.getCameras();
         if (availableCameras.length > 0) {
@@ -697,10 +802,10 @@
             document.getElementById('dock-flip').style.display = 'flex';
           }
         } else {
-          throw new Error('No camera found');
+          throw new Error('No camera');
         }
       } catch (e) {
-        console.warn('Kamera tapılmadı və ya icazə verilmədi:', e);
+        console.warn('Kamera tapılmadı:', e);
         isCamOn = false;
         btnToggleCam.className = 'btn-circle off';
         previewContainer.style.display = 'none';
@@ -711,9 +816,7 @@
     // Toggle Mic in Lobby
     btnToggleMic.onclick = async () => {
       isMicOn = !isMicOn;
-      if (localAudioTrack) {
-        await localAudioTrack.setEnabled(isMicOn);
-      }
+      if (localAudioTrack) await localAudioTrack.setEnabled(isMicOn);
       btnToggleMic.className = isMicOn ? 'btn-circle active' : 'btn-circle off';
       btnToggleMic.innerText = isMicOn ? '🎤' : '🔇';
     };
@@ -721,9 +824,7 @@
     // Toggle Cam in Lobby
     btnToggleCam.onclick = async () => {
       isCamOn = !isCamOn;
-      if (localVideoTrack) {
-        await localVideoTrack.setEnabled(isCamOn);
-      }
+      if (localVideoTrack) await localVideoTrack.setEnabled(isCamOn);
       if (isCamOn) {
         previewContainer.style.display = 'block';
         previewAvatar.style.display = 'none';
@@ -820,7 +921,12 @@
         // Event: Remote user left
         agoraClient.on('user-left', (user) => {
           const tile = document.getElementById(`user-tile-${user.uid}`);
-          if (tile) tile.remove();
+          if (tile) {
+            if (spotlightTileId === `user-tile-${user.uid}`) {
+              exitSpotlight();
+            }
+            tile.remove();
+          }
         });
 
         // Volume Indicator (Active Speaker)
@@ -829,7 +935,8 @@
           volumes.forEach((vol) => {
             const isSpeaking = vol.level > 15;
             if (vol.uid === uid || vol.uid === 0) {
-              document.getElementById('local-tile').classList.toggle('speaking', isSpeaking);
+              const localT = document.getElementById('local-tile');
+              if (localT) localT.classList.toggle('speaking', isSpeaking);
             } else {
               const tile = document.getElementById(`user-tile-${vol.uid}`);
               if (tile) tile.classList.toggle('speaking', isSpeaking);
@@ -840,7 +947,7 @@
         // Join Agora Channel
         await agoraClient.join(appId, channelName, token, uid);
 
-        // Render any existing remote users who joined before us
+        // Render any existing remote users
         if (agoraClient.remoteUsers && agoraClient.remoteUsers.length > 0) {
           agoraClient.remoteUsers.forEach((user) => {
             renderRemoteUser(user);
@@ -856,7 +963,7 @@
           }
         }
 
-        // Try creating camera track (may fail on devices without camera)
+        // Try creating camera track
         if (!localVideoTrack && isCamOn) {
           try {
             localVideoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -866,7 +973,7 @@
           }
         }
 
-        // Publish only available tracks
+        // Publish available tracks
         const tracksToPublish = [];
         if (localAudioTrack) tracksToPublish.push(localAudioTrack);
         if (localVideoTrack) tracksToPublish.push(localVideoTrack);
@@ -886,7 +993,7 @@
         // Setup Dock Button Events
         setupDockControls();
 
-        // Start Room Status Watcher (Heartbeat) - auto-disconnects if Host ends meeting
+        // Start Room Status Watcher (Heartbeat) - auto-destroys when Host ends meeting
         startRoomStatusWatcher();
 
       } catch (err) {
@@ -896,6 +1003,45 @@
         btnJoin.innerText = '🚀 Görüşməyə Qoşul';
       }
     };
+
+    // ── Spotlight Mode Handlers ──
+    function toggleSpotlight(tileId) {
+      if (spotlightTileId === tileId) {
+        exitSpotlight();
+        return;
+      }
+      enterSpotlight(tileId);
+    }
+
+    function enterSpotlight(tileId) {
+      const targetTile = document.getElementById(tileId);
+      if (!targetTile) return;
+
+      spotlightTileId = tileId;
+      callView.classList.add('spotlight-active');
+
+      // Place target tile into spotlight main
+      spotlightMain.appendChild(targetTile);
+
+      // Move all other tiles into strip
+      const allCards = document.querySelectorAll('.video-card');
+      allCards.forEach((card) => {
+        if (card.id !== tileId) {
+          spotlightStrip.appendChild(card);
+        }
+      });
+    }
+
+    function exitSpotlight() {
+      spotlightTileId = null;
+      callView.classList.remove('spotlight-active');
+
+      // Move all cards back to videoGrid
+      const allCards = document.querySelectorAll('.video-card');
+      allCards.forEach((card) => {
+        videoGrid.appendChild(card);
+      });
+    }
 
     let roomStatusWatcher = null;
 
@@ -918,7 +1064,7 @@
             await forceEndCall('🛑 Görüşmə Başa Çatdı', 'Host görüşməni sonlandırdı. Link artıq etibarsızdır.');
           }
         } catch (e) {
-          // Network fluctuation, ignore single check failure
+          // Ignore transient network errors
         }
       }, 2500);
     }
@@ -953,6 +1099,7 @@
         tile = document.createElement('div');
         tile.className = 'video-card';
         tile.id = `user-tile-${user.uid}`;
+        tile.onclick = () => toggleSpotlight(`user-tile-${user.uid}`);
         tile.innerHTML = `
           <div class="video-player" id="remote-player-${user.uid}" style="display:none;"></div>
           <div class="card-avatar" id="remote-avatar-${user.uid}" style="display:flex;">
@@ -964,7 +1111,12 @@
           </div>
           <div class="card-badge-mic unmuted" id="remote-mic-${user.uid}">🎤</div>
         `;
-        document.getElementById('video-grid').appendChild(tile);
+
+        if (spotlightTileId) {
+          spotlightStrip.appendChild(tile);
+        } else {
+          videoGrid.appendChild(tile);
+        }
       }
 
       const playerDiv = document.getElementById(`remote-player-${user.uid}`);
@@ -1052,8 +1204,8 @@
       document.getElementById('status-heading').innerText = heading;
       document.getElementById('status-msg').innerText = msg;
       document.getElementById('nav-status-text').innerText = 'Bağlandı';
-      document.getElementById('nav-status').style.borderColor = '#EF4444';
-      document.getElementById('nav-status').style.color = '#EF4444';
+      document.getElementById('nav-status').style.borderColor = '#DA373C';
+      document.getElementById('nav-status').style.color = '#DA373C';
     }
 
     // Start checking room
