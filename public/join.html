@@ -787,28 +787,33 @@
         // Initialize Agora Client
         agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
+        // Event: Remote user joined
+        agoraClient.on('user-joined', (user) => {
+          console.log('👤 Uzaq istifadəçi qoşuldu:', user.uid);
+          renderRemoteUser(user);
+        });
+
         // Event: Remote user published audio/video
         agoraClient.on('user-published', async (user, mediaType) => {
+          console.log(`📡 user-published: uid=${user.uid}, type=${mediaType}`);
           await agoraClient.subscribe(user, mediaType);
+          renderRemoteUser(user);
 
-          if (mediaType === 'video') {
-            renderRemoteVideo(user);
-          }
-          if (mediaType === 'audio') {
+          if (mediaType === 'audio' && user.audioTrack) {
             user.audioTrack.play();
+          }
+          if (mediaType === 'video' && user.videoTrack) {
+            renderRemoteUser(user);
           }
         });
 
         // Event: Remote user unpublished
         agoraClient.on('user-unpublished', (user, mediaType) => {
           if (mediaType === 'video') {
-            const tile = document.getElementById(`user-tile-${user.uid}`);
-            if (tile) {
-              const playerDiv = document.getElementById(`remote-player-${user.uid}`);
-              if (playerDiv) playerDiv.style.display = 'none';
-              const avatarDiv = document.getElementById(`remote-avatar-${user.uid}`);
-              if (avatarDiv) avatarDiv.style.display = 'flex';
-            }
+            const playerDiv = document.getElementById(`remote-player-${user.uid}`);
+            const avatarDiv = document.getElementById(`remote-avatar-${user.uid}`);
+            if (playerDiv) playerDiv.style.display = 'none';
+            if (avatarDiv) avatarDiv.style.display = 'flex';
           }
         });
 
@@ -816,7 +821,6 @@
         agoraClient.on('user-left', (user) => {
           const tile = document.getElementById(`user-tile-${user.uid}`);
           if (tile) tile.remove();
-          remoteUsers.delete(user.uid);
         });
 
         // Volume Indicator (Active Speaker)
@@ -835,6 +839,13 @@
 
         // Join Agora Channel
         await agoraClient.join(appId, channelName, token, uid);
+
+        // Render any existing remote users who joined before us
+        if (agoraClient.remoteUsers && agoraClient.remoteUsers.length > 0) {
+          agoraClient.remoteUsers.forEach((user) => {
+            renderRemoteUser(user);
+          });
+        }
 
         // Ensure mic track exists
         if (!localAudioTrack) {
@@ -883,32 +894,37 @@
       }
     };
 
-    function renderRemoteVideo(user) {
+    function renderRemoteUser(user) {
       let tile = document.getElementById(`user-tile-${user.uid}`);
       if (!tile) {
         tile = document.createElement('div');
         tile.className = 'video-card';
         tile.id = `user-tile-${user.uid}`;
         tile.innerHTML = `
-          <div class="video-player" id="remote-player-${user.uid}"></div>
-          <div class="card-avatar" id="remote-avatar-${user.uid}" style="display:none;">
+          <div class="video-player" id="remote-player-${user.uid}" style="display:none;"></div>
+          <div class="card-avatar" id="remote-avatar-${user.uid}" style="display:flex;">
             <div class="avatar-img">🎓</div>
             <div style="font-size:12px;font-weight:700;">İştirakçı</div>
           </div>
           <div class="card-badge-name">
             <span>İştirakçı (#${user.uid.toString().slice(-4)})</span>
           </div>
-          <div class="card-badge-mic unmuted">🎤</div>
+          <div class="card-badge-mic unmuted" id="remote-mic-${user.uid}">🎤</div>
         `;
         document.getElementById('video-grid').appendChild(tile);
       }
 
       const playerDiv = document.getElementById(`remote-player-${user.uid}`);
       const avatarDiv = document.getElementById(`remote-avatar-${user.uid}`);
-      if (playerDiv && user.videoTrack) {
-        playerDiv.style.display = 'block';
+      if (user.videoTrack) {
+        if (playerDiv) {
+          playerDiv.style.display = 'block';
+          user.videoTrack.play(`remote-player-${user.uid}`);
+        }
         if (avatarDiv) avatarDiv.style.display = 'none';
-        user.videoTrack.play(`remote-player-${user.uid}`);
+      } else {
+        if (playerDiv) playerDiv.style.display = 'none';
+        if (avatarDiv) avatarDiv.style.display = 'flex';
       }
     }
 
