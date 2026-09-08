@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>İdrak Liseyi - Canlı Görüşmə</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #070B16;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ─── Top Navbar ─── */
+    .navbar {
+      background-color: #0F172A;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0D9488, #14B8A6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #FFF;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #10B981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ─── Main Content Views ─── */
+    .view-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ─── Lobby View ─── */
+    #lobby-view {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .lobby-card {
+      background: #0F172A;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .lobby-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .lobby-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .lobby-header p {
+      color: #94A3B8;
+      font-size: 13px;
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 220px;
+      background: #070B16;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #preview-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .preview-avatar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: #64748B;
+    }
+
+    .preview-avatar .avatar-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .preview-controls {
+      position: absolute;
+      bottom: 12px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .btn-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-circle.active {
+      background: #0D9488;
+      border-color: #0D9488;
+    }
+
+    .btn-circle.off {
+      background: #EF4444;
+      border-color: #EF4444;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #E2E8F0;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1E293B;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      color: #FFF;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #0D9488;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #0D9488, #14B8A6);
+      border: none;
+      border-radius: 14px;
+      color: #FFF;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ─── Call View ─── */
+    #call-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .call-grid {
+      flex: 1;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      align-content: center;
+      justify-content: center;
+      overflow-y: auto;
+      max-height: calc(100vh - 140px);
+    }
+
+    @media (max-width: 600px) {
+      .call-grid {
+        grid-template-columns: 1fr;
+        padding: 8px;
+        gap: 8px;
+      }
+    }
+
+    .video-card {
+      background: #0F172A;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .video-card.speaking {
+      border: 2px solid #10B981;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .video-player {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .video-player.mirror {
+      transform: scaleX(-1);
+    }
+
+    .card-avatar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 1;
+    }
+
+    .card-avatar .avatar-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: #14B8A6;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-badge-name {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .card-badge-role {
+      background: rgba(20, 184, 166, 0.2);
+      color: #14B8A6;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .card-badge-mic {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      z-index: 10;
+    }
+
+    .card-badge-mic.muted {
+      background: #EF4444;
+      color: #FFF;
+    }
+
+    .card-badge-mic.unmuted {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    /* ─── In-Call Control Dock ─── */
+    .control-dock {
+      background: #0F172A;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: #FFF;
+      cursor: pointer;
+    }
+
+    .dock-btn .btn-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+
+    .dock-btn .btn-icon.active {
+      background: #10B981;
+      border-color: #10B981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .dock-btn .btn-icon.off {
+      background: #EF4444;
+      border-color: #EF4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .dock-btn .btn-icon.leave {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #EF4444;
+    }
+
+    .dock-btn .btn-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #94A3B8;
+    }
+
+    /* ─── Error / Ended Screen ─── */
+    #status-view {
+      flex: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .status-box {
+      background: #0F172A;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 36px 24px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .status-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+
+    .status-box h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .status-box p {
+      color: #94A3B8;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo">İ</div>
+      <div>
+        <div class="brand-title" id="nav-room-title">İdrak Liseyi Meet</div>
+        <div class="brand-sub" id="nav-host-info">Canlı Video Görüşmə</div>
+      </div>
+    </div>
+    <div class="status-badge" id="nav-status">
+      <span class="status-dot"></span>
+      <span id="nav-status-text">Qoşulmağa Hazır</span>
+    </div>
+  </header>
+
+  <main class="view-container">
+
+    <!-- 1. Lobby Screen (Pre-Join) -->
+    <section id="lobby-view">
+      <div class="lobby-card">
+        <div class="lobby-header">
+          <h2 id="lobby-title">Toplantıya Qoşul</h2>
+          <p id="lobby-desc">Qonaq kimi canlı görüşməyə daxil olursunuz</p>
+        </div>
+
+        <div class="preview-box">
+          <div id="preview-video-container" style="width:100%;height:100%;display:none;"></div>
+          <div class="preview-avatar" id="preview-avatar">
+            <div class="avatar-circle">👤</div>
+            <span style="font-size:12px;font-weight:600;">Kamera Bağlıdır</span>
+          </div>
+
+          <div class="preview-controls">
+            <button class="btn-circle off" id="btn-toggle-mic" title="Mikrofon">🎤</button>
+            <button class="btn-circle off" id="btn-toggle-cam" title="Kamera">📷</button>
+            <button class="btn-circle" id="btn-switch-cam" title="Kameranı Çevir" style="display:none;">🔄</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="guest-name">Adınız və Soyadınız:</label>
+          <input type="text" id="guest-name" class="form-input" placeholder="Məs: Samir Əliyev (Valideyn)" maxlength="40">
+        </div>
+
+        <button class="btn-primary" id="btn-join">
+          <span>🚀 Görüşməyə Qoşul</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. Call Screen (In-Meeting) -->
+    <section id="call-view">
+      <div class="call-grid" id="video-grid">
+        <!-- Local User Video Tile -->
+        <div class="video-card" id="local-tile">
+          <div class="video-player mirror" id="local-video-player"></div>
+          <div class="card-avatar" id="local-avatar">
+            <div class="avatar-img" id="local-initials">S</div>
+            <div style="font-size:12px;font-weight:700;" id="local-name-display">Siz</div>
+          </div>
+          <div class="card-badge-name">
+            <span id="local-badge-name">Siz (Qonaq)</span>
+            <span class="card-badge-role">Mən</span>
+          </div>
+          <div class="card-badge-mic unmuted" id="local-mic-badge">🎤</div>
+        </div>
+
+        <!-- Remote Participants will be dynamically appended here -->
+      </div>
+
+      <!-- Dock Controls -->
+      <footer class="control-dock">
+        <button class="dock-btn" id="dock-mic">
+          <div class="btn-icon active" id="dock-mic-icon">🎤</div>
+          <span class="btn-label" id="dock-mic-label">Səsim Açıq</span>
+        </button>
+
+        <button class="dock-btn" id="dock-cam">
+          <div class="btn-icon active" id="dock-cam-icon">📹</div>
+          <span class="btn-label" id="dock-cam-label">Kamera Açıq</span>
+        </button>
+
+        <button class="dock-btn" id="dock-flip" style="display:none;">
+          <div class="btn-icon" id="dock-flip-icon">🔄</div>
+          <span class="btn-label">Çevir</span>
+        </button>
+
+        <button class="dock-btn" id="dock-leave">
+          <div class="btn-icon leave">📞</div>
+          <span class="btn-label" style="color:#EF4444;">Ayrıl</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- 3. Status / Ended View -->
+    <section id="status-view">
+      <div class="status-box">
+        <div class="status-icon" id="status-icon">🔒</div>
+        <h3 id="status-heading">Görüşmə Başa Çatdı</h3>
+        <p id="status-msg">Bu otaq müəllim tərəfindən sonlandırılıb və ya qonaq linki deaktiv edilib.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ── Extract Room ID from URL path ──
+    const pathParts = window.location.pathname.split('/');
+    const roomId = pathParts[pathParts.length - 1] || 'default-room';
+
+    // ── Agora & Media State ──
+    let agoraClient = null;
+    let localAudioTrack = null;
+    let localVideoTrack = null;
+    let isMicOn = true;
+    let isCamOn = true;
+    let currentCameraIndex = 0;
+    let availableCameras = [];
+    const remoteUsers = new Map();
+
+    // DOM Elements
+    const lobbyView = document.getElementById('lobby-view');
+    const callView = document.getElementById('call-view');
+    const statusView = document.getElementById('status-view');
+    const guestNameInput = document.getElementById('guest-name');
+    const btnJoin = document.getElementById('btn-join');
+    const btnToggleMic = document.getElementById('btn-toggle-mic');
+    const btnToggleCam = document.getElementById('btn-toggle-cam');
+    const btnSwitchCam = document.getElementById('btn-switch-cam');
+    const previewContainer = document.getElementById('preview-video-container');
+    const previewAvatar = document.getElementById('preview-avatar');
+
+    // Check Room Status on load
+    async function checkRoom() {
+      try {
+        const res = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/status`);
+        if (!res.ok) {
+          showStatusScreen('Otaq Tapılmadı', 'Görüşmə linki etibarsızdır və ya vaxtı keçib.');
+          return;
+        }
+        const data = await res.json();
+        if (!data.active) {
+          showStatusScreen('Görüşmə Başa Çatıb', 'Bu otaq bağlanıb və daxil olmaq mümkün deyil.');
+          return;
+        }
+
+        document.getElementById('nav-room-title').innerText = data.title || 'İdrak Liseyi Meet';
+        document.getElementById('nav-host-info').innerText = `${data.hostName || 'Müəllim'} tərəfindən aparılır`;
+        document.getElementById('lobby-title').innerText = data.title || 'Toplantıya Qoşul';
+
+        initPreview();
+      } catch (err) {
+        console.error('Error fetching room status:', err);
+      }
+    }
+
+    // Initialize Camera & Mic preview in Lobby
+    async function initPreview() {
+      try {
+        availableCameras = await AgoraRTC.getCameras();
+        if (availableCameras.length > 1) {
+          btnSwitchCam.style.display = 'flex';
+          document.getElementById('dock-flip').style.display = 'flex';
+        }
+
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+
+        previewContainer.style.display = 'block';
+        previewAvatar.style.display = 'none';
+        localVideoTrack.play('preview-video-container');
+
+        btnToggleMic.className = 'btn-circle active';
+        btnToggleCam.className = 'btn-circle active';
+        isMicOn = true;
+        isCamOn = true;
+      } catch (e) {
+        console.warn('Media preview permission not granted or device missing:', e);
+        isMicOn = false;
+        isCamOn = false;
+        btnToggleMic.className = 'btn-circle off';
+        btnToggleCam.className = 'btn-circle off';
+      }
+    }
+
+    // Toggle Mic in Lobby
+    btnToggleMic.onclick = async () => {
+      isMicOn = !isMicOn;
+      if (localAudioTrack) {
+        await localAudioTrack.setEnabled(isMicOn);
+      }
+      btnToggleMic.className = isMicOn ? 'btn-circle active' : 'btn-circle off';
+      btnToggleMic.innerText = isMicOn ? '🎤' : '🔇';
+    };
+
+    // Toggle Cam in Lobby
+    btnToggleCam.onclick = async () => {
+      isCamOn = !isCamOn;
+      if (localVideoTrack) {
+        await localVideoTrack.setEnabled(isCamOn);
+      }
+      if (isCamOn) {
+        previewContainer.style.display = 'block';
+        previewAvatar.style.display = 'none';
+      } else {
+        previewContainer.style.display = 'none';
+        previewAvatar.style.display = 'flex';
+      }
+      btnToggleCam.className = isCamOn ? 'btn-circle active' : 'btn-circle off';
+      btnToggleCam.innerText = isCamOn ? '📷' : '🚫';
+    };
+
+    // Switch Camera (Front/Back)
+    async function switchCamera() {
+      if (availableCameras.length < 2 || !localVideoTrack) return;
+      currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+      const deviceId = availableCameras[currentCameraIndex].deviceId;
+      await localVideoTrack.setDevice(deviceId);
+    }
+    btnSwitchCam.onclick = switchCamera;
+    document.getElementById('dock-flip').onclick = switchCamera;
+
+    // Join Meeting
+    btnJoin.onclick = async () => {
+      const guestName = guestNameInput.value.trim();
+      if (!guestName) {
+        alert('Zəhmət olmasa adınızı və soyadınızı daxil edin.');
+        guestNameInput.focus();
+        return;
+      }
+
+      btnJoin.disabled = true;
+      btnJoin.innerText = 'Qoşulur...';
+
+      try {
+        const joinRes = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/join-guest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guestName }),
+        });
+
+        if (!joinRes.ok) {
+          const errData = await joinRes.json();
+          alert(errData.error || 'Otağa qoşulmaq mümkün olmadı.');
+          btnJoin.disabled = false;
+          btnJoin.innerText = '🚀 Görüşməyə Qoşul';
+          return;
+        }
+
+        const { appId, channelName, token, uid } = await joinRes.json();
+
+        // Switch to In-Call View
+        lobbyView.style.display = 'none';
+        callView.style.display = 'flex';
+        document.getElementById('nav-status-text').innerText = 'Canlı Qoşuldu';
+
+        // Update local tile info
+        document.getElementById('local-badge-name').innerText = `${guestName} (Qonaq)`;
+        document.getElementById('local-name-display').innerText = guestName;
+        document.getElementById('local-initials').innerText = guestName.charAt(0).toUpperCase();
+
+        // Initialize Agora Client
+        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+        // Event: Remote user published audio/video
+        agoraClient.on('user-published', async (user, mediaType) => {
+          await agoraClient.subscribe(user, mediaType);
+
+          if (mediaType === 'video') {
+            renderRemoteVideo(user);
+          }
+          if (mediaType === 'audio') {
+            user.audioTrack.play();
+          }
+        });
+
+        // Event: Remote user unpublished
+        agoraClient.on('user-unpublished', (user, mediaType) => {
+          if (mediaType === 'video') {
+            const tile = document.getElementById(`user-tile-${user.uid}`);
+            if (tile) {
+              const playerDiv = document.getElementById(`remote-player-${user.uid}`);
+              if (playerDiv) playerDiv.style.display = 'none';
+              const avatarDiv = document.getElementById(`remote-avatar-${user.uid}`);
+              if (avatarDiv) avatarDiv.style.display = 'flex';
+            }
+          }
+        });
+
+        // Event: Remote user left
+        agoraClient.on('user-left', (user) => {
+          const tile = document.getElementById(`user-tile-${user.uid}`);
+          if (tile) tile.remove();
+          remoteUsers.delete(user.uid);
+        });
+
+        // Volume Indicator (Active Speaker)
+        agoraClient.enableAudioVolumeIndicator();
+        agoraClient.on('volume-indicator', (volumes) => {
+          volumes.forEach((vol) => {
+            const isSpeaking = vol.level > 15;
+            if (vol.uid === uid || vol.uid === 0) {
+              document.getElementById('local-tile').classList.toggle('speaking', isSpeaking);
+            } else {
+              const tile = document.getElementById(`user-tile-${vol.uid}`);
+              if (tile) tile.classList.toggle('speaking', isSpeaking);
+            }
+          });
+        });
+
+        // Join Agora Channel
+        await agoraClient.join(appId, channelName, token, uid);
+
+        // Ensure tracks exist
+        if (!localAudioTrack) localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        if (!localVideoTrack) localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+
+        // Publish local tracks
+        await agoraClient.publish([localAudioTrack, localVideoTrack]);
+
+        // Play local video in call grid
+        localVideoTrack.play('local-video-player');
+        if (!isCamOn) {
+          document.getElementById('local-video-player').style.display = 'none';
+          document.getElementById('local-avatar').style.display = 'flex';
+        } else {
+          document.getElementById('local-avatar').style.display = 'none';
+        }
+
+        // Setup Dock Button Events
+        setupDockControls();
+
+      } catch (err) {
+        console.error('Join error:', err);
+        alert('Görüşməyə qoşularkən xəta baş verdi: ' + err.message);
+        btnJoin.disabled = false;
+        btnJoin.innerText = '🚀 Görüşməyə Qoşul';
+      }
+    };
+
+    function renderRemoteVideo(user) {
+      let tile = document.getElementById(`user-tile-${user.uid}`);
+      if (!tile) {
+        tile = document.createElement('div');
+        tile.className = 'video-card';
+        tile.id = `user-tile-${user.uid}`;
+        tile.innerHTML = `
+          <div class="video-player" id="remote-player-${user.uid}"></div>
+          <div class="card-avatar" id="remote-avatar-${user.uid}" style="display:none;">
+            <div class="avatar-img">🎓</div>
+            <div style="font-size:12px;font-weight:700;">İştirakçı</div>
+          </div>
+          <div class="card-badge-name">
+            <span>İştirakçı (#${user.uid.toString().slice(-4)})</span>
+          </div>
+          <div class="card-badge-mic unmuted">🎤</div>
+        `;
+        document.getElementById('video-grid').appendChild(tile);
+      }
+
+      const playerDiv = document.getElementById(`remote-player-${user.uid}`);
+      const avatarDiv = document.getElementById(`remote-avatar-${user.uid}`);
+      if (playerDiv && user.videoTrack) {
+        playerDiv.style.display = 'block';
+        if (avatarDiv) avatarDiv.style.display = 'none';
+        user.videoTrack.play(`remote-player-${user.uid}`);
+      }
+    }
+
+    function setupDockControls() {
+      const dockMic = document.getElementById('dock-mic');
+      const dockMicIcon = document.getElementById('dock-mic-icon');
+      const dockMicLabel = document.getElementById('dock-mic-label');
+      const localMicBadge = document.getElementById('local-mic-badge');
+
+      dockMic.onclick = async () => {
+        isMicOn = !isMicOn;
+        if (localAudioTrack) await localAudioTrack.setEnabled(isMicOn);
+        dockMicIcon.className = isMicOn ? 'btn-icon active' : 'btn-icon off';
+        dockMicIcon.innerText = isMicOn ? '🎤' : '🔇';
+        dockMicLabel.innerText = isMicOn ? 'Səsim Açıq' : 'Səssiz';
+        localMicBadge.className = isMicOn ? 'card-badge-mic unmuted' : 'card-badge-mic muted';
+        localMicBadge.innerText = isMicOn ? '🎤' : '🔇';
+      };
+
+      const dockCam = document.getElementById('dock-cam');
+      const dockCamIcon = document.getElementById('dock-cam-icon');
+      const dockCamLabel = document.getElementById('dock-cam-label');
+      const localVideoPlayer = document.getElementById('local-video-player');
+      const localAvatar = document.getElementById('local-avatar');
+
+      dockCam.onclick = async () => {
+        isCamOn = !isCamOn;
+        if (localVideoTrack) await localVideoTrack.setEnabled(isCamOn);
+        dockCamIcon.className = isCamOn ? 'btn-icon active' : 'btn-icon off';
+        dockCamIcon.innerText = isCamOn ? '📹' : '🚫';
+        dockCamLabel.innerText = isCamOn ? 'Kamera Açıq' : 'Kamera Bağlı';
+        localVideoPlayer.style.display = isCamOn ? 'block' : 'none';
+        localAvatar.style.display = isCamOn ? 'none' : 'flex';
+      };
+
+      document.getElementById('dock-leave').onclick = async () => {
+        if (confirm('Toplantıdan çıxmaq istəyirsiniz?')) {
+          await leaveCall();
+        }
+      };
+    }
+
+    async function leaveCall() {
+      try {
+        if (localAudioTrack) {
+          localAudioTrack.stop();
+          localAudioTrack.close();
+        }
+        if (localVideoTrack) {
+          localVideoTrack.stop();
+          localVideoTrack.close();
+        }
+        if (agoraClient) {
+          await agoraClient.leave();
+        }
+        await fetch(`/api/rooms/${encodeURIComponent(roomId)}/leave-guest`, { method: 'POST' }).catch(() => {});
+      } catch (e) {}
+      showStatusScreen('Ayrıldınız', 'Canlı görüşmədən uğurla çıxış etdiniz.');
+    }
+
+    function showStatusScreen(heading, msg) {
+      lobbyView.style.display = 'none';
+      callView.style.display = 'none';
+      statusView.style.display = 'flex';
+      document.getElementById('status-heading').innerText = heading;
+      document.getElementById('status-msg').innerText = msg;
+      document.getElementById('nav-status-text').innerText = 'Bağlandı';
+      document.getElementById('nav-status').style.borderColor = '#EF4444';
+      document.getElementById('nav-status').style.color = '#EF4444';
+    }
+
+    // Start checking room
+    checkRoom();
+  </script>
+</body>
+</html>
